@@ -84,23 +84,23 @@ if (String.prototype.includes === undefined) {
 }
 
 /**
- * IE11 polyfill for string.trimLeft function, from
+ * IE11 polyfill for string.trimStart function, from
  * https://stackoverflow.com/a/2308168
  */
-if (String.prototype.trimLeft === undefined) {
+if (String.prototype.trimStart === undefined) {
     // tslint:disable-next-line: space-before-function-paren
-    String.prototype.trimLeft = function (): string {
+    String.prototype.trimStart = function (): string {
         return this.replace(/^\s+/, '');
     };
 }
 
 /**
- * IE11 polyfill for string.trimLeft function, from
+ * IE11 polyfill for string.trimEnd function, from
  * https://stackoverflow.com/a/2308168
  */
-if (String.prototype.trimRight === undefined) {
+if (String.prototype.trimEnd === undefined) {
     // tslint:disable-next-line: space-before-function-paren
-    String.prototype.trimRight = function (): string {
+    String.prototype.trimEnd = function (): string {
         return this.replace(/\s+$/, '');
     };
 }

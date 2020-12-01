@@ -332,7 +332,7 @@ namespace auxiliaries {
         if (path.includes(PATH_SEPARATOR) === false) {
             return '';
         }
-        return path.substr(0, path.lastIndexOf(PATH_SEPARATOR)).trimLeft();
+        return path.substr(0, path.lastIndexOf(PATH_SEPARATOR)).trimStart();
     }
 
     /**
@@ -343,7 +343,7 @@ namespace auxiliaries {
         if (path.includes(PATH_SEPARATOR) === false) {
             return path;
         }
-        return path.substr(path.lastIndexOf(PATH_SEPARATOR) + 1).trimRight();
+        return path.substr(path.lastIndexOf(PATH_SEPARATOR) + 1).trimEnd();
     }
 
 }

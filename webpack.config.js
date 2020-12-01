@@ -27,7 +27,7 @@ module.exports = {
     context: __dirname + '/source',
     cache: false,
     entry: {
-        'js/webgl-operate.js': ['polyfill.ts', 'webgl-operate.ts'],
+        'js/webgl-operate.js': ['url-polyfill', 'polyfill.js', 'webgl-operate.ts'],
     },
     devtool: 'source-map',
     plugins: [
@@ -44,7 +44,8 @@ module.exports = {
     ],
     resolve: {
         modules: [__dirname + '/node_modules', __dirname + '/source'],
-        extensions: ['.ts', '.tsx', '.js']
+        extensions: ['.ts', '.tsx', '.js'],
+        fallback: { 'url': require.resolve('./node_modules/url-polyfill/url-polyfill.min.js') }
     },
     watchOptions: {
         ignored: ['node_modules/**']

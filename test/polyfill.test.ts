@@ -15,10 +15,10 @@ const originalRepeat: any | undefined = String.prototype.repeat as any | undefin
 String.prototype.repeat = originalRepeat;
 const originalStartsWith: any | undefined = String.prototype.startsWith;
 String.prototype.startsWith = originalStartsWith;
-const originalTrimLeft: any | undefined = String.prototype.trimLeft;
-String.prototype.trimLeft = originalTrimLeft;
-const originalTrimRight: any | undefined = String.prototype.trimRight;
-String.prototype.trimRight = originalTrimRight;
+const originalTrimStart: any | undefined = String.prototype.trimStart;
+String.prototype.trimStart = originalTrimStart;
+const originalTrimEnd: any | undefined = String.prototype.trimEnd;
+String.prototype.trimEnd = originalTrimEnd;
 const originalLog10: any | undefined = Math.log10;
 Math.log10 = originalLog10;
 
@@ -28,8 +28,8 @@ class MyString extends String {
 
 delete String.prototype['repeat'];
 delete String.prototype.startsWith;
-delete String.prototype.trimLeft;
-delete String.prototype.trimRight;
+delete String.prototype.trimStart;
+delete String.prototype.trimEnd;
 delete Math.log10;
 
 MyString.prototype.repeat = originalRepeat;
@@ -72,24 +72,24 @@ export namespace test {
             expect(testString.startsWith('est')).to.be.false;
         });
 
-        it('trimLeft function should work as intended', () => {
-            expect(originalTrimLeft).to.not.eq(String.prototype.trimLeft);
+        it('trimStart function should work as intended', () => {
+            expect(originalTrimStart).to.not.eq(String.prototype.trimStart);
 
             const trimmable = ' test';
             const notTrimmable = 'test';
 
-            expect(trimmable.trimLeft()).to.eql(notTrimmable);
-            expect(notTrimmable.trimLeft()).to.eql(notTrimmable);
+            expect(trimmable.trimStart()).to.eql(notTrimmable);
+            expect(notTrimmable.trimStart()).to.eql(notTrimmable);
         });
 
-        it('trimRight function should work as intended', () => {
-            expect(originalTrimRight).to.not.eq(String.prototype.trimRight);
+        it('trimEnd function should work as intended', () => {
+            expect(originalTrimEnd).to.not.eq(String.prototype.trimEnd);
 
             const trimmable = 'test ';
             const notTrimmable = 'test';
 
-            expect(trimmable.trimRight()).to.eql(notTrimmable);
-            expect(notTrimmable.trimRight()).to.eql(notTrimmable);
+            expect(trimmable.trimEnd()).to.eql(notTrimmable);
+            expect(notTrimmable.trimEnd()).to.eql(notTrimmable);
         });
 
         it('log10 repeat function should work as intended', () => {
