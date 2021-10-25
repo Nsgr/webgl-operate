@@ -138,5 +138,11 @@
         "title": "XToon Shading",
         "object": "XToonExample",
         "caption": "Minimal example showing XToon shading for simple geometry."
+    },
+    {
+        "target": "vector-example",
+        "title": "Labeled Vectors and Points",
+        "object": "VectorExample",
+        "caption": "Displaying labeled vectors and points for educational examples."
     }
 ]
