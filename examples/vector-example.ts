@@ -18,8 +18,8 @@ import {
     Shader,
     Text,
     Wizard,
-    vec3,
 } from 'webgl-operate';
+import { vec3 } from 'gl-matrix';
 import { Example } from './example';
 
 class VectorRenderer extends Renderer {
