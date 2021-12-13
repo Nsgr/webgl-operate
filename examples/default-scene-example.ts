@@ -37,22 +37,22 @@ class DefaultSceneRenderer extends Renderer {
 
     // @scene replace cuboid with scene?
     // + gizmo
-    // + observedCameraFrustrum
+    // + observedCameraFrustum
     protected _cuboid: CuboidGeometry;
     protected _texture: Texture2D;
     protected _blit: BlitPass;
     protected _zoomSrcBounds: vec4;
     protected _zoomDstBounds: vec4;
 
-    // frustrum geometry
-    protected _frustrumData: Float32Array;
-    protected _frustrumBuffer: WebGLBuffer;
-    protected _frustrumProgram: Program;
+    // frustum geometry
+    protected _frustumData: Float32Array;
+    protected _frustumBuffer: WebGLBuffer;
+    protected _frustumProgram: Program;
 
     // settings
-    protected _renderFrustrumToFar = true;
-    protected _frustrumNearColor = vec3.fromValues(1.0, 1.0, 1.0);
-    protected _frustrumFarColor = vec3.fromValues(0.5, 0.5, 0.5);
+    protected _renderFrustumToFar = true;
+    protected _frustumNearColor = vec3.fromValues(1.0, 1.0, 1.0);
+    protected _frustumFarColor = vec3.fromValues(0.5, 0.5, 0.5);
 
     // settings for observed camera
     protected readonly _observedEye = vec3.fromValues(0.0, 0.0, 5.0);
@@ -143,25 +143,25 @@ class DefaultSceneRenderer extends Renderer {
         this._observedCamera.far = this._observedFar;
 
 
-        this._frustrumData = this.createFrustrumLines(this._observedCamera, this._renderFrustrumToFar, this._frustrumNearColor, this._frustrumFarColor);
+        this._frustumData = this.createFrustumLines(this._observedCamera, this._renderFrustumToFar, this._frustumNearColor, this._frustumFarColor);
 
-        this._frustrumBuffer = gl.createBuffer();
-        gl.bindBuffer(gl.ARRAY_BUFFER, this._frustrumBuffer);
-        gl.bufferData(gl.ARRAY_BUFFER, this._frustrumData, gl.STATIC_DRAW);
+        this._frustumBuffer = gl.createBuffer();
+        gl.bindBuffer(gl.ARRAY_BUFFER, this._frustumBuffer);
+        gl.bufferData(gl.ARRAY_BUFFER, this._frustumData, gl.STATIC_DRAW);
 
-        const frustrumVert = new Shader(this._context, gl.VERTEX_SHADER, 'lines.vert');
-        frustrumVert.initialize(require('./data/lines.vert'));
-        const frustrumFrag = new Shader(this._context, gl.FRAGMENT_SHADER, 'lines.frag');
-        frustrumFrag.initialize(require('./data/lines.frag'));
+        const frustumVert = new Shader(this._context, gl.VERTEX_SHADER, 'lines.vert');
+        frustumVert.initialize(require('./data/lines.vert'));
+        const frustumFrag = new Shader(this._context, gl.FRAGMENT_SHADER, 'lines.frag');
+        frustumFrag.initialize(require('./data/lines.frag'));
 
-        this._frustrumProgram = new Program(this._context, "LinesProgram");
-        this._frustrumProgram.initialize([frustrumVert, frustrumFrag], false);
+        this._frustumProgram = new Program(this._context, "LinesProgram");
+        this._frustumProgram.initialize([frustumVert, frustumFrag], false);
 
-        this._frustrumProgram.link();
-        this._frustrumProgram.bind();
+        this._frustumProgram.link();
+        this._frustumProgram.bind();
 
-        this._frustrumProgram.attribute('a_vertex', 0);
-        this._frustrumProgram.attribute('a_color', 1);
+        this._frustumProgram.attribute('a_vertex', 0);
+        this._frustumProgram.attribute('a_color', 1);
 
         // init actual camera
         this._camera = new Camera();
@@ -189,8 +189,8 @@ class DefaultSceneRenderer extends Renderer {
         this._cuboid.uninitialize();
         this._program.uninitialize();
 
-        this._context.gl.deleteBuffer(this._frustrumBuffer);
-        this._frustrumProgram.uninitialize();
+        this._context.gl.deleteBuffer(this._frustumBuffer);
+        this._frustumProgram.uninitialize();
 
         this._defaultFBO.uninitialize();
     }
@@ -303,17 +303,16 @@ class DefaultSceneRenderer extends Renderer {
 
         this._texture.unbind(gl.TEXTURE0);
 
-        this._frustrumProgram.bind();
-        gl.uniformMatrix4fv(this._frustrumProgram.uniform('u_viewProjection'),
+        this._frustumProgram.bind();
+        gl.uniformMatrix4fv(this._frustumProgram.uniform('u_viewProjection'),
             gl.GL_FALSE, this._camera.viewProjection);
 
 
-        this._frustrumData = this.createFrustrumLines(this._observedCamera, this._renderFrustrumToFar, this._frustrumNearColor, this._frustrumFarColor);
+        this._frustumData = this.createFrustumLines(this._observedCamera, this._renderFrustumToFar, this._frustumNearColor, this._frustumFarColor);
 
-        this._frustrumBuffer = gl.createBuffer();
-        gl.bindBuffer(gl.ARRAY_BUFFER, this._frustrumBuffer);
-        gl.bufferData(gl.ARRAY_BUFFER, this._frustrumData, gl.STATIC_DRAW);
-
+        this._frustumBuffer = gl.createBuffer();
+        gl.bindBuffer(gl.ARRAY_BUFFER, this._frustumBuffer);
+        gl.bufferData(gl.ARRAY_BUFFER, this._frustumData, gl.STATIC_DRAW);
 
         // refer to https://developer.mozilla.org/en-US/docs/Web/API/WebGLRenderingContext/vertexAttribPointer for more information
 
@@ -325,13 +324,13 @@ class DefaultSceneRenderer extends Renderer {
         gl.enableVertexAttribArray(0);
         gl.enableVertexAttribArray(1);
 
-        gl.drawArrays(gl.LINES, 0, this._frustrumData.length / 6);
+        gl.drawArrays(gl.LINES, 0, this._frustumData.length / 6);
         gl.bindBuffer(gl.ARRAY_BUFFER, Buffer.DEFAULT_BUFFER);
 
         gl.disableVertexAttribArray(0);
         gl.disableVertexAttribArray(1);
 
-        this._frustrumProgram.unbind();
+        this._frustumProgram.unbind();
 
         gl.cullFace(gl.BACK);
         gl.disable(gl.CULL_FACE);
@@ -351,106 +350,191 @@ class DefaultSceneRenderer extends Renderer {
         this._blit.frame();
     }
 
+    protected vertFovToHorFov(fov: number, aspect: number): number {
+        return 2 * Math.atan(Math.tan(fov / 2) * aspect);
+    }
 
-    protected createFrustrumLines(_camera: Camera, _includeFar: Boolean, _nearColor: vec3, _farColor: vec3): Float32Array {
-        const lookAt = vec3.sub(vec3.create(), _camera.center, _camera.eye);
+    protected calculateSideAndRUp(
+        dir: vec3, up: vec3
+    ): { side: vec3, rUp: vec3 } {
+        const side = vec3.cross(vec3.create(), dir, up);
+        vec3.normalize(side, side);
+        const rUp = vec3.cross(vec3.create(), side, dir);
+        vec3.normalize(rUp, rUp);
+        return { side, rUp };
+    }
 
-        vec3.normalize(_camera.up, _camera.up);
-        vec3.normalize(lookAt, lookAt);
+    protected buildCorner(
+        out: vec3,
+        eye: vec3,
+        dir: vec3,
+        up: vec3, upFac: number,
+        side: vec3, sideFac: number
+    ): vec3 {
+        vec3.add(out, out, eye);
+        vec3.add(out, out, dir);
+        vec3.scaleAndAdd(out, out, up, upFac);
+        return vec3.scaleAndAdd(out, out, side, sideFac);
+    }
 
-        const b = vec3.cross(vec3.create(), _camera.up, lookAt);
-        vec3.scale(b, b, Math.tan((_camera.fovy * Math.PI / 180) / 2.0));
-        const fovX = 2.0 * Math.atan(Math.tan((_camera.fovy * Math.PI / 180) / 2.0) * _camera.aspect);
-        const a = vec3.scale(vec3.create(), _camera.up, Math.tan(fovX / 2.0));
+    protected createFrustumLines(_camera: Camera, _includeFar: Boolean, _nearColor: vec3, _farColor: vec3): Float32Array {
+        const eye = _camera.eye;
+        const near = _camera.near;
+        const far = _camera.far;
+        const dir = vec3.sub(vec3.create(), _camera.center, eye);
+        vec3.normalize(dir, dir);
+        const up = _camera.up;
+        const fovY = _camera.fovy * Math.PI / 180;
+        const hFovY = fovY / 2;
+        const tHFovY = Math.tan(hFovY);
+        const hFovX = this.vertFovToHorFov(fovY, _camera.aspect) / 2;
+        const tHFovX = Math.tan(hFovX);
 
-        // for some reason, its going to get rendered in the wrong aspect (fovx / fovy exchanged)
-        console.log(_camera.aspect);
+        // calculate a new up vector that is actually perpendicular to dir
+        const { side, rUp } = this.calculateSideAndRUp(dir, up);
 
-        const a_near = vec3.scale(vec3.create(), a, _camera.near);
-        const b_near = vec3.scale(vec3.create(), b, _camera.near);
-        const center_near = vec3.scale(vec3.create(), lookAt, _camera.near);
-        vec3.add(center_near, center_near, _camera.eye);
+        const nHalfWidth = tHFovX * near;
+        const nHalfHeight = tHFovY * near;
+        const nSide = vec3.scale(vec3.create(), side, nHalfWidth);
+        const nUp = vec3.scale(vec3.create(), rUp, nHalfHeight);
+        const nDir = vec3.scale(vec3.create(), dir, near);
 
-        const a_far = vec3.scale(vec3.create(), a, _camera.far);
-        const b_far = vec3.scale(vec3.create(), b, _camera.far);
-        const center_far = vec3.scale(vec3.create(), lookAt, _camera.far);
-        vec3.add(center_far, center_far, _camera.eye);
+        const fHalfWidth = tHFovX * far;
+        const fHalfHeight = tHFovY * far;
+        const fSide = vec3.scale(vec3.create(), side, fHalfWidth);
+        const fUp = vec3.scale(vec3.create(), rUp, fHalfHeight);
+        const fDir = vec3.scale(vec3.create(), dir, far);
 
-        const NearTopLeft = vec3.add(vec3.create(), center_near, vec3.sub(vec3.create(), a_near, b_near));
-        const NearTopRight = vec3.add(vec3.create(), center_near, vec3.add(vec3.create(), a_near, b_near));
-        const NearBottomLeft = vec3.sub(vec3.create(), center_near, vec3.add(vec3.create(), a_near, b_near));
-        const NearBottomRight = vec3.sub(vec3.create(), center_near, vec3.sub(vec3.create(), a_near, b_near));
-        const FarTopLeft = vec3.add(vec3.create(), center_far, vec3.sub(vec3.create(), a_far, b_far));
-        const FarTopRight = vec3.add(vec3.create(), center_far, vec3.add(vec3.create(), a_far, b_far));
-        const FarBottomLeft = vec3.sub(vec3.create(), center_far, vec3.add(vec3.create(), a_far, b_far));
-        const FarBottomRight = vec3.sub(vec3.create(), center_far, vec3.sub(vec3.create(), a_far, b_far));
+        const nnn = this.buildCorner(vec3.create(), eye, nDir, nUp, -1, nSide, -1);
+        const npn = this.buildCorner(vec3.create(), eye, nDir, nUp, -1, nSide, +1);
+        const pnn = this.buildCorner(vec3.create(), eye, nDir, nUp, +1, nSide, -1);
+        const ppn = this.buildCorner(vec3.create(), eye, nDir, nUp, +1, nSide, +1);
+        const nnf = this.buildCorner(vec3.create(), eye, fDir, fUp, -1, fSide, -1);
+        const npf = this.buildCorner(vec3.create(), eye, fDir, fUp, -1, fSide, +1);
+        const pnf = this.buildCorner(vec3.create(), eye, fDir, fUp, +1, fSide, -1);
+        const ppf = this.buildCorner(vec3.create(), eye, fDir, fUp, +1, fSide, +1);
 
-        const NearTopTop = vec3.add(vec3.create(), center_near, vec3.add(vec3.create(), a_near, _camera.up));
+        // build lines
+        const numLines = (_includeFar) ? 19 : 11;
+        const verticesPerLine = 2;
+        const componentsPerVertex = 3;
 
-        let _lines = [ // x, y, z, r, g, b,
-            // from camera to corners
-            _camera.eye[0], _camera.eye[1], _camera.eye[2], _nearColor[0], _nearColor[1], _nearColor[2],
-            NearTopLeft[0], NearTopLeft[1], NearTopLeft[2], _nearColor[0], _nearColor[1], _nearColor[2],
+        const colorComponentsPerVertex = 3;
 
-            _camera.eye[0], _camera.eye[1], _camera.eye[2], _nearColor[0], _nearColor[1], _nearColor[2],
-            NearTopRight[0], NearTopRight[1], NearTopRight[2], _nearColor[0], _nearColor[1], _nearColor[2],
+        const vertices =
+            new Float32Array(numLines * verticesPerLine * (componentsPerVertex + colorComponentsPerVertex));
 
-            _camera.eye[0], _camera.eye[1], _camera.eye[2], _nearColor[0], _nearColor[1], _nearColor[2],
-            NearBottomLeft[0], NearBottomLeft[1], NearBottomLeft[2], _nearColor[0], _nearColor[1], _nearColor[2],
+        let offset = 0;
 
-            _camera.eye[0], _camera.eye[1], _camera.eye[2], _nearColor[0], _nearColor[1], _nearColor[2],
-            NearBottomRight[0], NearBottomRight[1], NearBottomRight[2], _nearColor[0], _nearColor[1], _nearColor[2],
+        // near plane
+        vertices.set(nnn, offset++ * 3);
+        vertices.set(_nearColor, offset++ * 3);
+        vertices.set(npn, offset++ * 3);
+        vertices.set(_nearColor, offset++ * 3);
 
-            // from corners to corners
-            NearTopLeft[0], NearTopLeft[1], NearTopLeft[2], _nearColor[0], _nearColor[1], _nearColor[2],
-            NearTopRight[0], NearTopRight[1], NearTopRight[2], _nearColor[0], _nearColor[1], _nearColor[2],
+        vertices.set(npn, offset++ * 3);
+        vertices.set(_nearColor, offset++ * 3);
+        vertices.set(ppn, offset++ * 3);
+        vertices.set(_nearColor, offset++ * 3);
 
-            NearTopRight[0], NearTopRight[1], NearTopRight[2], _nearColor[0], _nearColor[1], _nearColor[2],
-            NearBottomRight[0], NearBottomRight[1], NearBottomRight[2], _nearColor[0], _nearColor[1], _nearColor[2],
+        vertices.set(ppn, offset++ * 3);
+        vertices.set(_nearColor, offset++ * 3);
+        vertices.set(pnn, offset++ * 3);
+        vertices.set(_nearColor, offset++ * 3);
 
-            NearBottomRight[0], NearBottomRight[1], NearBottomRight[2], _nearColor[0], _nearColor[1], _nearColor[2],
-            NearBottomLeft[0], NearBottomLeft[1], NearBottomLeft[2], _nearColor[0], _nearColor[1], _nearColor[2],
+        vertices.set(pnn, offset++ * 3);
+        vertices.set(_nearColor, offset++ * 3);
+        vertices.set(nnn, offset++ * 3);
+        vertices.set(_nearColor, offset++ * 3);
 
-            NearBottomLeft[0], NearBottomLeft[1], NearBottomLeft[2], _nearColor[0], _nearColor[1], _nearColor[2],
-            NearTopLeft[0], NearTopLeft[1], NearTopLeft[2], _nearColor[0], _nearColor[1], _nearColor[2],
+        // cam to near plane
 
-            // top indicator (discounter blender like)
-            NearTopLeft[0], NearTopLeft[1], NearTopLeft[2], _nearColor[0], _nearColor[1], _nearColor[2],
-            NearTopTop[0], NearTopTop[1], NearTopTop[2], _nearColor[0], _nearColor[1], _nearColor[2],
+        vertices.set(_camera.eye, offset++ * 3);
+        vertices.set(_nearColor, offset++ * 3);
+        vertices.set(nnn, offset++ * 3);
+        vertices.set(_nearColor, offset++ * 3);
 
-            NearTopRight[0], NearTopRight[1], NearTopRight[2], _nearColor[0], _nearColor[1], _nearColor[2],
-            NearTopTop[0], NearTopTop[1], NearTopTop[2], _nearColor[0], _nearColor[1], _nearColor[2],
-        ];
+        vertices.set(_camera.eye, offset++ * 3);
+        vertices.set(_nearColor, offset++ * 3);
+        vertices.set(npn, offset++ * 3);
+        vertices.set(_nearColor, offset++ * 3);
+
+        vertices.set(_camera.eye, offset++ * 3);
+        vertices.set(_nearColor, offset++ * 3);
+        vertices.set(ppn, offset++ * 3);
+        vertices.set(_nearColor, offset++ * 3);
+
+        vertices.set(_camera.eye, offset++ * 3);
+        vertices.set(_nearColor, offset++ * 3);
+        vertices.set(pnn, offset++ * 3);
+        vertices.set(_nearColor, offset++ * 3);
+
+        // blender-like up indicator
+        const upTriangle1 = this.buildCorner(vec3.create(), eye, nDir, nUp, +1.1, nSide, +0.5);
+        const upTriangle2 = this.buildCorner(vec3.create(), eye, nDir, nUp, +1.1, nSide, -0.5);
+        const upTriangleTop = this.buildCorner(vec3.create(), eye, nDir, nUp, +1.4, nSide, 0);
+
+        vertices.set(upTriangle1, offset++ * 3);
+        vertices.set(_nearColor, offset++ * 3);
+        vertices.set(upTriangle2, offset++ * 3);
+        vertices.set(_nearColor, offset++ * 3);
+
+        vertices.set(upTriangle1, offset++ * 3);
+        vertices.set(_nearColor, offset++ * 3);
+        vertices.set(upTriangleTop, offset++ * 3);
+        vertices.set(_nearColor, offset++ * 3);
+
+        vertices.set(upTriangle2, offset++ * 3);
+        vertices.set(_nearColor, offset++ * 3);
+        vertices.set(upTriangleTop, offset++ * 3);
+        vertices.set(_nearColor, offset++ * 3);
+
+        // far plane
         if (_includeFar) {
-            _lines.push( // x, y, z, r, g, b
-                // from near corners to far corners
-                NearTopLeft[0], NearTopLeft[1], NearTopLeft[2], _farColor[0], _farColor[1], _farColor[2],
-                FarTopLeft[0], FarTopLeft[1], FarTopLeft[2], _farColor[0], _farColor[1], _farColor[2],
+            // far plane itself
+            vertices.set(nnf, offset++ * 3);
+            vertices.set(_farColor, offset++ * 3);
+            vertices.set(npf, offset++ * 3);
+            vertices.set(_farColor, offset++ * 3);
 
-                NearTopRight[0], NearTopRight[1], NearTopRight[2], _farColor[0], _farColor[1], _farColor[2],
-                FarTopRight[0], FarTopRight[1], FarTopRight[2], _farColor[0], _farColor[1], _farColor[2],
+            vertices.set(npf, offset++ * 3);
+            vertices.set(_farColor, offset++ * 3);
+            vertices.set(ppf, offset++ * 3);
+            vertices.set(_farColor, offset++ * 3);
 
-                NearBottomLeft[0], NearBottomLeft[1], NearBottomLeft[2], _farColor[0], _farColor[1], _farColor[2],
-                FarBottomLeft[0], FarBottomLeft[1], FarBottomLeft[2], _farColor[0], _farColor[1], _farColor[2],
+            vertices.set(ppf, offset++ * 3);
+            vertices.set(_farColor, offset++ * 3);
+            vertices.set(pnf, offset++ * 3);
+            vertices.set(_farColor, offset++ * 3);
 
-                NearBottomRight[0], NearBottomRight[1], NearBottomRight[2], _farColor[0], _farColor[1], _farColor[2],
-                FarBottomRight[0], FarBottomRight[1], FarBottomRight[2], _farColor[0], _farColor[1], _farColor[2],
+            vertices.set(pnf, offset++ * 3);
+            vertices.set(_farColor, offset++ * 3);
+            vertices.set(nnf, offset++ * 3);
+            vertices.set(_farColor, offset++ * 3);
 
-                // from corners to corners
-                FarTopLeft[0], FarTopLeft[1], FarTopLeft[2], _farColor[0], _farColor[1], _farColor[2],
-                FarTopRight[0], FarTopRight[1], FarTopRight[2], _farColor[0], _farColor[1], _farColor[2],
+            // near -> far connections
+            vertices.set(nnn, offset++ * 3);
+            vertices.set(_farColor, offset++ * 3);
+            vertices.set(nnf, offset++ * 3);
+            vertices.set(_farColor, offset++ * 3);
 
-                FarTopRight[0], FarTopRight[1], FarTopRight[2], _farColor[0], _farColor[1], _farColor[2],
-                FarBottomRight[0], FarBottomRight[1], FarBottomRight[2], _farColor[0], _farColor[1], _farColor[2],
+            vertices.set(npn, offset++ * 3);
+            vertices.set(_farColor, offset++ * 3);
+            vertices.set(npf, offset++ * 3);
+            vertices.set(_farColor, offset++ * 3);
 
-                FarBottomRight[0], FarBottomRight[1], FarBottomRight[2], _farColor[0], _farColor[1], _farColor[2],
-                FarBottomLeft[0], FarBottomLeft[1], FarBottomLeft[2], _farColor[0], _farColor[1], _farColor[2],
+            vertices.set(pnn, offset++ * 3);
+            vertices.set(_farColor, offset++ * 3);
+            vertices.set(pnf, offset++ * 3);
+            vertices.set(_farColor, offset++ * 3);
 
-                FarBottomLeft[0], FarBottomLeft[1], FarBottomLeft[2], _farColor[0], _farColor[1], _farColor[2],
-                FarTopLeft[0], FarTopLeft[1], FarTopLeft[2], _farColor[0], _farColor[1], _farColor[2],
-            );
+            vertices.set(ppn, offset++ * 3);
+            vertices.set(_farColor, offset++ * 3);
+            vertices.set(ppf, offset++ * 3);
+            vertices.set(_farColor, offset++ * 3);
         }
-        return new Float32Array(_lines);
+
+        return vertices;
     }
 
 }
