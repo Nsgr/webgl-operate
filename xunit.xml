@@ -1,0 +1,263 @@
+<testsuite name="Mocha Tests" tests="261" failures="0" errors="0" skipped="0" timestamp="Wed, 15 Dec 2021 13:10:07 GMT" time="0.204">
+<testcase classname="PrimitiveKernels" name="function position to never fail and return undefined" time="0.008"/>
+<testcase classname="PrimitiveKernels" name="get function should run on correct indices" time="0.007"/>
+<testcase classname="PrimitiveKernels" name="set function should run on correct indices" time="0.009"/>
+<testcase classname="PrimitiveKernels" name="should be sortable with evey sorting approach" time="0"/>
+<testcase classname="PrimitiveKernels" name="should be initializable from JSON" time="0"/>
+<testcase classname="PrimitiveKernels" name="should be able to retrieve dimension lengths" time="0"/>
+<testcase classname="PrimitiveKernels" name="should be able to retrieve strides" time="0.001"/>
+<testcase classname="AllocationRegister" name="should provide unique identifier" time="0"/>
+<testcase classname="AllocationRegister" name="should not allow tracking for unknown identifier" time="0"/>
+<testcase classname="AllocationRegister" name="should remove unique identifier" time="0"/>
+<testcase classname="AllocationRegister" name="should accumulate identifier allocations" time="0"/>
+<testcase classname="AllocationRegister" name="should accumulate identifier deallocations" time="0.001"/>
+<testcase classname="AllocationRegister" name="should accumulate multiple identifier allocations" time="0"/>
+<testcase classname="AllocationRegister" name="should be initialized with zero bytes for every identifier" time="0"/>
+<testcase classname="AllocationRegister" name="should throw on allocations for an unknown identifier" time="0"/>
+<testcase classname="AllocationRegister" name="should not allow negatie allocations" time="0"/>
+<testcase classname="AllocationRegister" name="should not allow deallocations to exceed allocations" time="0"/>
+<testcase classname="AllocationRegister" name="should reset on reallocation" time="0"/>
+<testcase classname="AllocationRegister" name="should reset cached size on reallocations" time="0"/>
+<testcase classname="AllocationRegister" name="should track correct overall bytes on allocations" time="0"/>
+<testcase classname="AllocationRegister" name="should track correct overall bytes on deallocations" time="0"/>
+<testcase classname="AllocationRegister" name="should track correct overall bytes on reallocations" time="0"/>
+<testcase classname="AllocationRegister" name="should pretty print allocated bytes by identifier" time="0"/>
+<testcase classname="AllocationRegister" name="should pretty print overall allocated bytes" time="0"/>
+<testcase classname="AllocationRegister" name="should allow observation of overall allocated bytes" time="0.001"/>
+<testcase classname="AntiAliasingKernel" name="should comprise at least a single element" time="0"/>
+<testcase classname="AntiAliasingKernel" name="should have two component samples and provide byte information" time="0"/>
+<testcase classname="AntiAliasingKernel" name="should start with [0.0, 0.0] unless golden set" time="0.005"/>
+<testcase classname="AntiAliasingKernel" name="should not regenerate when (re)setting same width" time="0"/>
+<testcase classname="auxiliaries assert" name="should not throw on true expression" time="0"/>
+<testcase classname="auxiliaries assert" name="should throw on false expression" time="0"/>
+<testcase classname="auxiliaries assert" name="should be allowed to be disabled" time="0"/>
+<testcase classname="auxiliaries log and logIf" name="should not log on false expression" time="0.001"/>
+<testcase classname="auxiliaries log and logIf" name="should log on true expression" time="0.001"/>
+<testcase classname="auxiliaries log and logIf" name="should use the correct log level" time="0.001"/>
+<testcase classname="auxiliaries log and logIf" name="should respect verbosity level" time="0.001"/>
+<testcase classname="auxiliaries log and logIf" name="can be called with more parameters" time="0.001"/>
+<testcase classname="auxiliaries rand" name="should not exceed range within 1000 tests (fuzzy)" time="0.02"/>
+<testcase classname="auxiliaries rand" name="should return in range [0.0,1.0] by default (fuzzy)" time="0.015"/>
+<testcase classname="auxiliaries prettyPrintBytes" name="should print bytes for bytes &#x3C; 1024" time="0"/>
+<testcase classname="auxiliaries prettyPrintBytes" name="should print kibi bytes for bytes between 1024, 1048575" time="0"/>
+<testcase classname="auxiliaries prettyPrintMilliseconds" name="should convert and use correct suffixes" time="0"/>
+<testcase classname="auxiliaries bitInBitfield" name="should detect set/unset bits in bitfield" time="0.001"/>
+<testcase classname="auxiliaries bitInBitfield" name="should return false for undefined flag" time="0"/>
+<testcase classname="auxiliaries RAD2DEG and DEG2RAD" name="should be bijective" time="0"/>
+<testcase classname="auxiliaries RAD2DEG and DEG2RAD" name="should convert degree to radian for sample set" time="0"/>
+<testcase classname="auxiliaries RAD2DEG and DEG2RAD" name="should convert radian to degree for sample set" time="0"/>
+<testcase classname="auxiliaries GETsearch, GETparameter" name="should return value of present parameters" time="0"/>
+<testcase classname="auxiliaries GETsearch, GETparameter" name="should return the value of the top frame if the current frame does not have any" time="0"/>
+<testcase classname="auxiliaries GETsearch, GETparameter" name="should return the value of the current frame, if it has one -- independent of its top frame" time="0"/>
+<testcase classname="auxiliaries path" name="should return the directory name of a file path" time="0"/>
+<testcase classname="auxiliaries path" name="should return the base name of a file path" time="0"/>
+<testcase classname="auxiliaries power-of-two" name="should return detect if number is power of two" time="0"/>
+<testcase classname="auxiliaries power-of-two" name="should return upper power of two for a given number" time="0"/>
+<testcase classname="field of view" name="should be initializable as fovy" time="0"/>
+<testcase classname="field of view" name="should be initializable as fovx" time="0"/>
+<testcase classname="field of view" name="should be initializable via physical camera settings" time="0"/>
+<testcase classname="Change Lookup" name="should detect basic property changes" time="0"/>
+<testcase classname="Change Lookup" name="should push leaf changes bottom-up (any)" time="0"/>
+<testcase classname="Change Lookup" name="should ignore subsequent alterations" time="0"/>
+<testcase classname="Change Lookup" name="should propagate alteration of object to sub-objects" time="0"/>
+<testcase classname="Color" name="should default to [0.0, 0.0, 0.0, 1.0]" time="0"/>
+<testcase classname="Color" name="should scale and round unsigned int (8bit) values" time="0"/>
+<testcase classname="Color" name="should provide RGBA UI8 setter" time="0.001"/>
+<testcase classname="Color" name="should provide RGBA component getter" time="0"/>
+<testcase classname="Color" name="should be settable from RGBA" time="0"/>
+<testcase classname="Color" name="should be settable from RGBA with alpha" time="0"/>
+<testcase classname="Color" name="should not scale float (32bit) values" time="0"/>
+<testcase classname="Color" name="should convert hex color string to RGB(A) color" time="0.001"/>
+<testcase classname="Color" name="should support optional &#x27;0x&#x27; and &#x27;#&#x27; prefixes for hex color string to RGB(A) conversion" time="0.001"/>
+<testcase classname="Color" name="should log and default on malformed hex color string to RGB(A) conversion" time="0.001"/>
+<testcase classname="Color" name="should convert RGB(A) color to hex color string" time="0"/>
+<testcase classname="Color" name="should convert CMYK color to RGB color" time="0.001"/>
+<testcase classname="Color" name="should log and clamp on out of range CMYK components to RGB conversion" time="0"/>
+<testcase classname="Color" name="should convert RGB color to CMYK color" time="0"/>
+<testcase classname="Color" name="should convert HSL color to RGB color" time="0.001"/>
+<testcase classname="Color" name="should log and clamp on out of range HSL components to RGB conversion" time="0.001"/>
+<testcase classname="Color" name="should convert RGB color to HSL color" time="0.001"/>
+<testcase classname="Color" name="should convert LAB color to RGB color" time="0.001"/>
+<testcase classname="Color" name="should log and clamp on out of range LAB components to RGB conversion" time="0"/>
+<testcase classname="Color" name="should convert RGB color to LAB color" time="0"/>
+<testcase classname="Color" name="should compute various grayscales" time="0.001"/>
+<testcase classname="Color" name="should track alterations" time="0"/>
+<testcase classname="Color" name="should support check for equality" time="0"/>
+<testcase classname="Color" name="should mix two colors in supported color spaces" time="0.001"/>
+<testcase classname="Color" name="should support tuple conversion for supported color spaces" time="0.001"/>
+<testcase classname="ColorScale" name="should be loadable from preset" time="0"/>
+<testcase classname="ColorScale" name="should be creatable from an array" time="0"/>
+<testcase classname="ColorScale" name="should be creatable from an array with positions" time="0"/>
+<testcase classname="ColorScale" name="should be creatable from an array with positions" time="0"/>
+<testcase classname="ColorScale" name="should be creatable from an array with alpha values" time="0"/>
+<testcase classname="ColorScale" name="should be creatable from float an array" time="0"/>
+<testcase classname="ColorScale" name="should be creatable from float an array" time="0"/>
+<testcase classname="ColorScale" name="should be creatable from an array with alpha values" time="0"/>
+<testcase classname="ColorScale" name="should be creatable from an array with empty arrays" time="0"/>
+<testcase classname="ColorScale" name="should be linear interpolate-able with only one color" time="0"/>
+<testcase classname="ColorScale" name="should be linear interpolate-able" time="0"/>
+<testcase classname="ColorScale" name="should be linear interpolate-able with nearest" time="0"/>
+<testcase classname="ColorScale" name="should be undefined when calling lerp on ColorScale without colors" time="0"/>
+<testcase classname="ColorScale" name="should return the colors" time="0"/>
+<testcase classname="ColorScale" name="should return undefined when calling colors on empty ColorScale" time="0"/>
+<testcase classname="ColorScale" name="should return undefined when calling colors on out of range" time="0"/>
+<testcase classname="ColorScale" name="colors should be set and readable" time="0"/>
+<testcase classname="ColorScale" name="colors should be set and readable" time="0"/>
+<testcase classname="ColorScale" name="should be invertible" time="0.001"/>
+<testcase classname="ColorScale" name="should be able to turn to UInt8 bits" time="0"/>
+<testcase classname="ColorScale" name="should be able to turn to float32 bits" time="0"/>
+<testcase classname="ContextMasquerade" name="should be initializable from hash" time="0"/>
+<testcase classname="ContextMasquerade" name="should be initializable from browser preset" time="0"/>
+<testcase classname="ContextMasquerade" name="should respect functions being undefined" time="0"/>
+<testcase classname="ContextMasquerade" name="should raise an exception if present does not exists" time="0"/>
+<testcase classname="ContextMasquerade" name="should be initializable from empty preset" time="0"/>
+<testcase classname="ContextMasquerade" name="should be initializable from hand written preset" time="0"/>
+<testcase classname="ContextMasquerade" name="should be initializable from hash w.r.t. draw buffers extension" time="0"/>
+<testcase classname="Controller" name="should be constructable" time="0"/>
+<testcase classname="Controller" name="should not be blocked after initialization" time="0"/>
+<testcase classname="Controller" name="should block explicit updates when blocked" time="0.001"/>
+<testcase classname="Controller" name="should block implicit updates on re-configuration" time="0"/>
+<testcase classname="Controller" name="should render on unblock after initialization" time="0.001"/>
+<testcase classname="Controller" name="should render on unblock after already rendering before" time="0"/>
+<testcase classname="Controller" name="should not render when not initialized" time="0.001"/>
+<testcase classname="Controller" name="should return multi-frame number as set" time="0"/>
+<testcase classname="Controller" name="should return debug-frame number as set" time="0"/>
+<testcase classname="Controller" name="should clamp debug-frame number to [0,multi-frame number]" time="0.001"/>
+<testcase classname="Controller" name="should restart render when multi-frame number is changed" time="0"/>
+<testcase classname="Controller" name="should request next animation frame only once a frame (simple renderer)" time="0"/>
+<testcase classname="Controller" name="should request next animation frame only once a frame (self-invalidating renderer)" time="0.001"/>
+<testcase classname="ExtensionsHash" name="should encode valid bitfields to base64" time="0"/>
+<testcase classname="ExtensionsHash" name="should decode base64 to valid bitfields" time="0"/>
+<testcase classname="ExtensionsHash" name="should throw on out of range bitfields for encoding" time="0"/>
+<testcase classname="ExtensionsHash" name="should throw on unknown base64 input for decoding" time="0"/>
+<testcase classname="ExtensionsHash" name="should encode version and backend in head" time="0"/>
+<testcase classname="ExtensionsHash" name="should encode single extensions" time="0"/>
+<testcase classname="ExtensionsHash" name="should throw when decoding hash with invalid length" time="0"/>
+<testcase classname="ExtensionsHash" name="should throw when decoding wrong characters in hash" time="0"/>
+<testcase classname="ExtensionsHash" name="should split version and backend when decoding" time="0"/>
+<testcase classname="ExtensionsHash" name="should decode extensions" time="0"/>
+<testcase classname="ExtensionsHash" name="should complement a set of extensions for webgl2" time="0"/>
+<testcase classname="ExtensionsHash" name="should complement a set of extensions for webgl1" time="0"/>
+<testcase classname="first person modifier" name="should be creatable" time="0"/>
+<testcase classname="first person modifier" name="should not modify the camera if no changes were made" time="0"/>
+<testcase classname="first person modifier" name="should modify the camera if changes were made" time="0.001"/>
+<testcase classname="first person modifier" name="should modify the camera if changes were made without movement" time="0"/>
+<testcase classname="first person modifier" name="should have the default sensitivity" time="0"/>
+<testcase classname="first person modifier" name="should be able to change the sensitivity" time="0"/>
+<testcase classname="first person modifier functions " name="update should not fail if the camera is not set" time="0"/>
+<testcase classname="first person modifier functions " name="camera setter should not fail on same camera as input" time="0"/>
+<testcase classname="first person modifier functions " name="camera setter should not fail if undefined is provided" time="0"/>
+<testcase classname="gl-matrix extensions sign" name="should return the sign of a number as specified in GLSL" time="0"/>
+<testcase classname="gl-matrix extensions clamp" name="should clamp a number as specified in GLSL" time="0"/>
+<testcase classname="gl-matrix extensions clamp" name="should clamp a vec2 as specified in GLSL" time="0"/>
+<testcase classname="gl-matrix extensions clamp" name="should clamp a vec3 as specified in GLSL" time="0"/>
+<testcase classname="gl-matrix extensions clamp" name="should clamp a vec4 as specified in GLSL" time="0"/>
+<testcase classname="gl-matrix extensions abs" name="should return the absolute of a vec2 as specified in GLSL" time="0.001"/>
+<testcase classname="gl-matrix extensions abs" name="should return the absolute of a vec3 as specified in GLSL" time="0"/>
+<testcase classname="gl-matrix extensions abs" name="should return the absolute of a vec4 as specified in GLSL" time="0"/>
+<testcase classname="gl-matrix extensions" name="should calculate the fraction of a positive or negative number" time="0"/>
+<testcase classname="gl-matrix extensions" name="should mix two numbers as specified in GLSL" time="0"/>
+<testcase classname="gl-matrix extensions" name="should derive a vec3 from vec4 with division by w component" time="0"/>
+<testcase classname="gl-matrix extensions" name="should derive a vec3 from vec4 without division by w component if w = 0" time="0"/>
+<testcase classname="gl-matrix extensions" name="should derive a vec4 from vec3 as normalized vec4 with w = 1" time="0"/>
+<testcase classname="gl-matrix extensions" name="should provide tinified empty vec2, vec3, and vec4 constructors" time="0"/>
+<testcase classname="gl-matrix extensions" name="should parse vec2 from string" time="0.001"/>
+<testcase classname="gl-matrix extensions" name="should parse vec3 from string" time="0"/>
+<testcase classname="gl-matrix extensions" name="should parse vec4 from string" time="0"/>
+<testcase classname="gl-matrix extensions" name="should provide default initialized vec and mat abbreviations" time="0"/>
+<testcase classname="gl-matrix extensions (un)packing" name="should pack a uint24 into a uint8x3" time="0.001"/>
+<testcase classname="gl-matrix extensions (un)packing" name="should unpack a uint24 from a uint8x3" time="0"/>
+<testcase classname="gl-matrix extensions (un)packing" name="should pack a uint32 into a uint8x4" time="0"/>
+<testcase classname="gl-matrix extensions (un)packing" name="should unpack a uint32 from a uint8x4" time="0"/>
+<testcase classname="gl-matrix extensions (un)packing" name="should pack the maximum uint32 into a uint8x4" time="0"/>
+<testcase classname="gl-matrix extensions (un)packing" name="should unpack a uint32 from the maximum uint8x4" time="0"/>
+<testcase classname="gl-matrix extensions (un)packing" name="should pack a float24 into a uint8x3" time="0"/>
+<testcase classname="gl-matrix extensions (un)packing" name="should unpack a float24 from uint8x3" time="0"/>
+<testcase classname="Initializable" name="should be uninitialized after construction" time="0"/>
+<testcase classname="Initializable" name="should initialize when not initialized" time="0"/>
+<testcase classname="Initializable" name="should un-initialize when initialized" time="0"/>
+<testcase classname="Initializable" name="should not uninitialize when not initialized" time="0"/>
+<testcase classname="Initializable" name="should not initialize multiple times (subsequently)" time="0"/>
+<testcase classname="Initializable" name="should re-initialize when previously initialized and uninitialized" time="0.001"/>
+<testcase classname="Initializable" name="asserting for initialized should fail when not initialized" time="0"/>
+<testcase classname="Initializable" name="asserting for initialized should fail after beeing uninitialized" time="0"/>
+<testcase classname="Initializable" name="asserting for uninitialized should fail when initialized" time="0"/>
+<testcase classname="Initializable" name="should remain uninitialized when initialization fails" time="0"/>
+<testcase classname="Initializable" name="should support assert (un)initialized by means of decorators" time="0.001"/>
+<testcase classname="Initializable" name="should decorate per-instance" time="0"/>
+<testcase classname="Initializable" name="should decorate per-instance" time="0"/>
+<testcase classname="Object" name="should generate identifier when none is given" time="0"/>
+<testcase classname="Object" name="should create object on initialize" time="0"/>
+<testcase classname="Object" name="should assert when accessing uninitialized object" time="0"/>
+<testcase classname="Object" name="should delete object on uninitialize" time="0"/>
+<testcase classname="Object" name="should be valid only when initialized" time="0"/>
+<testcase classname="Object" name="asserting for valid object after creation" time="0"/>
+<testcase classname="Object" name="should pass arguments on initialization" time="0"/>
+<testcase classname="Property validation" name="should trigger JSON-schema based validation" time="0.003"/>
+<testcase classname="Property validation" name="should resolve schema references for validation" time="0.001"/>
+<testcase classname="Property complementation" name="should not complement undefined" time="0"/>
+<testcase classname="Property complementation" name="should complement defaults (plain)" time="0"/>
+<testcase classname="Property complementation" name="should complement defaults (object)" time="0"/>
+<testcase classname="Property complementation" name="should complement defaults (arrays)" time="0"/>
+<testcase classname="Property complementation" name="should not complement defaults for non-object arrays" time="0"/>
+<testcase classname="Property comparison" name="should deep compare two basic objects" time="0"/>
+<testcase classname="Property comparison" name="should deep compare two objects" time="0"/>
+<testcase classname="Property comparison" name="should track alterations on compare" time="0"/>
+<testcase classname="RamdomSquareKernel" name="be initializable with values &#x3E; 0" time="0.001"/>
+<testcase classname="RamdomSquareKernel" name="be not be initializable with values &#x3C;= 0" time="0.001"/>
+<testcase classname="Ray Math" name="ray plane intersection should return undefined intersection, when there is none" time="0"/>
+<testcase classname="Ray Math" name="ray plane intersection should result in straight lines, since direction stays within plane" time="0.001"/>
+<testcase classname="Ray Math" name="ray plane intersection should account for constrained intersections, e. g., ray from below" time="0"/>
+<testcase classname="Ray Math" name="ray plane intersection should return valid intersections" time="0"/>
+<testcase classname="Ray Math" name="ray plane intersection should return undefined intersection, invalid ray is provided" time="0"/>
+<testcase classname="Ray Math" name="point-within-square evaluation should be positive for the center as well as points on edges" time="0"/>
+<testcase classname="Ray Math" name="point-within-square evaluation should be positive for the center as well as points on edges" time="0"/>
+<testcase classname="Ray Math" name="point-within-square evaluation should be negative for points outside the square" time="0"/>
+<testcase classname="Ray Math" name="point-within-square evaluation should be positive for points within the square" time="0"/>
+<testcase classname="Ray Math" name="ray circle intersection should return undefined intersection, when there is none" time="0"/>
+<testcase classname="Ray Math" name="ray circle intersection should return valid intersection points" time="0.001"/>
+<testcase classname="Resizable" name="instance should receive onResize" time="0"/>
+<testcase classname="Resizable" name="instance should not receive onResize after destroyed" time="0"/>
+<testcase classname="Tile Camera Generator Scanline Iteration" name=" should render in the correct order" time="0.003"/>
+<testcase classname="Tile Camera Generator Hilbert Iteration" name=" should render in the correct order" time="0.001"/>
+<testcase classname="Tile Camera Generator Z-Curve Iteration" name=" should render in the correct order" time="0.001"/>
+<testcase classname="TileCameraGenerator.nextTile" name="should return ture and reset the iteration when the current tile is &#x3C; 0." time="0"/>
+<testcase classname="TileCameraGenerator.nextTile" name="should return false when the current tile too high." time="0"/>
+<testcase classname="TileCameraGenerator.nextTile" name="should return true when the current indice is in range." time="0.001"/>
+<testcase classname="TileCameraGenerator.reset" name="should set the tile to -1" time="0"/>
+<testcase classname="TileCameraGenerator.reset" name="should set the offset to 0" time="0"/>
+<testcase classname="TileCameraGenerator.sourceCameraChanged" name="should set the camera" time="0"/>
+<testcase classname="TileCameraGenerator.update" name="should return the same offset when called multiple times on same tile index" time="0"/>
+<testcase classname="TileCameraGenerator.update" name="should return the prevoius offset when called with invalid tile index" time="0"/>
+<testcase classname="TileCameraGenerator.viewport" name="should be a combination of the offset and tileSize" time="0.001"/>
+<testcase classname="TileCameraGenerator.sourceCamera" name="cameras should be undefined if the parameter is undefined" time="0"/>
+<testcase classname="TileCameraGenerator should stay valid if reassigning the same values" name="sourceViewort" time="0"/>
+<testcase classname="TileCameraGenerator should stay valid if reassigning the same values" name="tileSize" time="0"/>
+<testcase classname="tuples clamp" name="should clamp a float value to [0.0, 1.0] range" time="0"/>
+<testcase classname="tuples clamp" name="should clamp each component of a float 2-tuple to [0.0, 1.0] range" time="0"/>
+<testcase classname="tuples clamp" name="should clamp each component of a float 3-tuple to [0.0, 1.0] range" time="0.001"/>
+<testcase classname="tuples clamp" name="should clamp each component of a float 4-tuple to [0.0, 1.0] range" time="0"/>
+<testcase classname="tuples" name="should duplicate 2-tuples" time="0"/>
+<testcase classname="tuples" name="should duplicate 3-tuples" time="0"/>
+<testcase classname="tuples" name="should duplicate 4-tuples" time="0"/>
+<testcase classname="tuples" name="should support check for equality of 2-tuples" time="0"/>
+<testcase classname="tuples" name="should support check for equality of 3-tuples" time="0"/>
+<testcase classname="tuples" name="should support check for equality of 4-tuples" time="0"/>
+<testcase classname="UnifiedBuffer" name="should create buffer on gpu lazily" time="0"/>
+<testcase classname="UnifiedBuffer" name="should work with different TypedArrays" time="0"/>
+<testcase classname="UnifiedBuffer" name="should keep content on resize" time="0"/>
+<testcase classname="UnifiedBuffer subData" name="should throw on data exceeding size" time="0"/>
+<testcase classname="UnifiedBuffer subData" name="should work with subarrays" time="0"/>
+<testcase classname="UnifiedBuffer update" name="should not make unnecessary subData calls" time="0"/>
+<testcase classname="UnifiedBuffer update" name="should discard old updates" time="0.001"/>
+<testcase classname="UnifiedBuffer update" name="should merge overlapping updates 1" time="0"/>
+<testcase classname="UnifiedBuffer update" name="should merge overlapping updates 2" time="0"/>
+<testcase classname="UnifiedBuffer update" name="should merge overlapping updates 3" time="0"/>
+<testcase classname="UnifiedBuffer update" name="should merge overlapping updates 4" time="0"/>
+<testcase classname="UnifiedBuffer update" name="should not merge separate updates" time="0"/>
+<testcase classname="UnifiedBuffer update" name="should respect the merge threshold on non-overlapping ranges 1" time="0"/>
+<testcase classname="UnifiedBuffer update" name="should respect the merge threshold on non-overlapping ranges 2" time="0"/>
+<testcase classname="UnifiedBuffer update" name="should respect the merge threshold on overlapping ranges" time="0"/>
+<testcase classname="UnifiedBuffer mergeSubDataRanges" name="should merge all ranges within threshold" time="0"/>
+<testcase classname="UnifiedBuffer mergeSubDataRanges" name="should merge all ranges if threshold == -1" time="0"/>
+</testsuite>

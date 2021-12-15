@@ -1,4 +1,5 @@
 import {
+    auxiliaries,
     Buffer,
     Camera,
     Canvas,
@@ -16,35 +17,27 @@ import {
     Shader,
     Wizard,
     BlitPass,
+    LabelRenderPass,
+    Label,
+    Position3DLabel,
+    Projected3DLabel,
+    FontFace,
+    Text,
 } from 'webgl-operate';
-import { mat4, vec4, vec3 } from 'gl-matrix';
+import { mat4, vec4, vec3 } from 'gl-matrix'; // correct imports?
 import { Example } from './example';
 
 class DefaultSceneRenderer extends Renderer {
 
-    protected _defaultFBO: DefaultFramebuffer;
-
-    protected _observedCamera: Camera;
-    protected _observedDepthBuffer: Renderbuffer;
-    protected _observedColorRender: Texture2D;
-    protected _observedFramebuffer: Framebuffer;
-
-    protected _camera: Camera;
-    protected _navigation: Navigation;
-
-    protected _program: Program;
-    protected _uViewProjection: WebGLUniformLocation;
-
-    // @scene replace cuboid with scene?
-    // + gizmo
-    // + observedCameraFrustum
+    // @TODO replace cuboid with scene?
+    // @TODO gizmo?
+    // - SCENE -
+    // internal
     protected _cuboid: CuboidGeometry;
     protected _texture: Texture2D;
-    protected _blit: BlitPass;
-    protected _zoomSrcBounds: vec4;
-    protected _zoomDstBounds: vec4;
 
-    // frustum geometry
+    // - FRUSTUM -
+    // internal
     protected _frustumData: Float32Array;
     protected _frustumBuffer: WebGLBuffer;
     protected _frustumProgram: Program;
@@ -54,16 +47,53 @@ class DefaultSceneRenderer extends Renderer {
     protected _frustumNearColor = vec3.fromValues(1.0, 1.0, 1.0);
     protected _frustumFarColor = vec3.fromValues(0.5, 0.5, 0.5);
 
-    // settings for observed camera
-    protected readonly _observedEye = vec3.fromValues(0.0, 0.0, 5.0);
-    protected readonly _observedCenter = vec3.fromValues(0, 0, 0);
-    protected readonly _observedUp = vec3.fromValues(0, 1, 0);
-    protected readonly _observedNear = 1;
-    protected readonly _observedFar = 8;
+    // - FRUSTUM-LABELS -
+    // internal
+    protected _frustumLabelFont: FontFace;
+    protected _frustumLabelPass: LabelRenderPass;
+
+    // - FRUSTUM-TEXTURE -
+    // internal
+    // @TODO change from blitting to texture on near plane
+    protected _blit: BlitPass;
+    protected _zoomSrcBounds: vec4;
+    protected _zoomDstBounds: vec4;
+
+    // - CLIPPING -
+    // internal
+    protected _uEnableClipping: WebGLUniformLocation;
+    protected _uObservedTransform: WebGLUniformLocation;
+
+    // settings
+    protected _enableClipping: Boolean;
+    protected _observedTransform: mat4;
+
+    // - OBSERVED CAMERA -
+    // internal
+    protected _observedCamera: Camera;
+    protected _observedDepthBuffer: Renderbuffer;
+    protected _observedColorRender: Texture2D;
+    protected _observedFramebuffer: Framebuffer;
+
+    // settings
+    protected _observedEye = vec3.fromValues(0.0, 0.0, 5.0);
+    protected _observedCenter = vec3.fromValues(0, 0, 0);
+    protected _observedUp = vec3.fromValues(0, 1, 0);
+    protected _observedNear = 1;
+    protected _observedFar = 8;
+
+    // - ACTUAL CAMERA -
+    // internal
+    protected _defaultFBO: DefaultFramebuffer;
+    protected _camera: Camera;
+    protected _navigation: Navigation;
+    protected _program: Program;
+    protected _uViewProjection: WebGLUniformLocation;
 
     protected onInitialize(context: Context, callback: Invalidate,
         eventProvider: EventProvider): boolean {
 
+        // shorthands
         // gl for gl functions access
         const gl = context.gl;
         // gl2facade for ADDITIONAL gl functions access
@@ -73,35 +103,45 @@ class DefaultSceneRenderer extends Renderer {
         this._defaultFBO = new DefaultFramebuffer(context, 'DefaultFBO');
         this._defaultFBO.initialize();
 
+        // - OBSERVED CAMERA -
+        // init camera object
+        this._observedCamera = new Camera(
+            this._observedEye,
+            this._observedCenter,
+            this._observedUp);
+        this._observedCamera.near = this._observedNear;
+        this._observedCamera.far = this._observedFar;
+
         // init observed color render
-        // we need the internal format for that to just be able to yoink
+        // we to copy the internal format to out target texture
         const internalFormatAndType = Wizard.queryInternalTextureFormat(this._context, gl.RGBA, Wizard.Precision.half);
 
-        this._observedColorRender = new Texture2D(this._context, 'ColorRenderTexture');
+        this._observedColorRender = new Texture2D(this._context, 'ObservedColorRender');
         this._observedColorRender.initialize(1, 1, internalFormatAndType[0], gl.RGBA, internalFormatAndType[1]);
         this._observedColorRender.filter(gl.LINEAR, gl.LINEAR);
 
         // init observed depth buffer for z test
-        this._observedDepthBuffer = new Renderbuffer(this._context, 'DepthRenderbuffer');
+        this._observedDepthBuffer = new Renderbuffer(this._context, 'ObservedDepthBuffer');
         this._observedDepthBuffer.initialize(1, 1, gl.DEPTH_COMPONENT16);
 
         // init combined observed framebuffer based off the two
-        this._observedFramebuffer = new Framebuffer(this._context, 'IntermediateFBO');
+        this._observedFramebuffer = new Framebuffer(this._context, 'ObservedFramebuffer');
         this._observedFramebuffer.initialize([
             [gl2facade.COLOR_ATTACHMENT0, this._observedColorRender],
             [gl.DEPTH_ATTACHMENT, this._observedDepthBuffer]]);
 
-        // @scene
+        // - SCENE -
+        // init cuboid
         this._cuboid = new CuboidGeometry(context, 'Cuboid', true, [2.0, 2.0, 2.0]);
         this._cuboid.initialize();
 
-        // @scene init shaders and program for default cube
+        // init cuboid shaders
         const vert = new Shader(context, gl.VERTEX_SHADER, 'mesh-progressive.vert');
         vert.initialize(require('./data/mesh-progressive.vert'));
         const frag = new Shader(context, gl.FRAGMENT_SHADER, 'mesh.frag');
         frag.initialize(require('./data/mesh.frag'));
 
-        // @scene
+        // init cuboid program
         this._program = new Program(context, 'CubeProgram');
         this._program.initialize([vert, frag], false);
 
@@ -134,35 +174,11 @@ class DefaultSceneRenderer extends Renderer {
             this.invalidate(true);
         });
 
-        // init observed camera
-        this._observedCamera = new Camera(
-            this._observedEye,
-            this._observedCenter,
-            this._observedUp);
-        this._observedCamera.near = this._observedNear;
-        this._observedCamera.far = this._observedFar;
+        // @scene blit buffer
+        this._blit = new BlitPass(this._context);
+        this._blit.initialize();
 
-
-        this._frustumData = this.createFrustumLines(this._observedCamera, this._renderFrustumToFar, this._frustumNearColor, this._frustumFarColor);
-
-        this._frustumBuffer = gl.createBuffer();
-        gl.bindBuffer(gl.ARRAY_BUFFER, this._frustumBuffer);
-        gl.bufferData(gl.ARRAY_BUFFER, this._frustumData, gl.STATIC_DRAW);
-
-        const frustumVert = new Shader(this._context, gl.VERTEX_SHADER, 'lines.vert');
-        frustumVert.initialize(require('./data/lines.vert'));
-        const frustumFrag = new Shader(this._context, gl.FRAGMENT_SHADER, 'lines.frag');
-        frustumFrag.initialize(require('./data/lines.frag'));
-
-        this._frustumProgram = new Program(this._context, "LinesProgram");
-        this._frustumProgram.initialize([frustumVert, frustumFrag], false);
-
-        this._frustumProgram.link();
-        this._frustumProgram.bind();
-
-        this._frustumProgram.attribute('a_vertex', 0);
-        this._frustumProgram.attribute('a_color', 1);
-
+        // - ACTUAL CAMERA -
         // init actual camera
         this._camera = new Camera();
         this._camera.center = vec3.fromValues(0.0, 0.0, 0.0);
@@ -175,9 +191,50 @@ class DefaultSceneRenderer extends Renderer {
         this._navigation = new Navigation(callback, eventProvider);
         this._navigation.camera = this._camera;
 
-        // @scene blit buffer
-        this._blit = new BlitPass(this._context);
-        this._blit.initialize();
+        this._frustumLabelPass = new LabelRenderPass(context);
+        this._frustumLabelPass.initialize();
+
+
+        this.updateObservedFrustum(this._observedCamera);
+
+        this._frustumBuffer = gl.createBuffer();
+        gl.bindBuffer(gl.ARRAY_BUFFER, this._frustumBuffer);
+        gl.bufferData(gl.ARRAY_BUFFER, this._frustumData, gl.STATIC_DRAW);
+
+        const frustumVert = new Shader(this._context, gl.VERTEX_SHADER, 'lines.vert');
+        frustumVert.initialize(require('./data/lines.vert'));
+        const frustumFrag = new Shader(this._context, gl.FRAGMENT_SHADER, 'lines.frag');
+        frustumFrag.initialize(require('./data/lines.frag'));
+
+        this._frustumProgram = new Program(this._context, "FrustumLinesProgram");
+        this._frustumProgram.initialize([frustumVert, frustumFrag], false);
+
+        this._frustumProgram.link();
+        this._frustumProgram.bind();
+
+        this._frustumProgram.attribute('a_vertex', 0);
+        this._frustumProgram.attribute('a_color', 1);
+
+
+        this._frustumLabelPass.camera = this._camera;
+        this._frustumLabelPass.target = this._defaultFBO;
+        this._frustumLabelPass.depthMask = true;
+
+        // - FRUSTUM -
+        // @TODO create frustum thingies
+        FontFace.fromFile('./data/opensans2048p160d16.fnt', context)
+            .then((fontFace) => {
+                this.updateObservedFrustum(this._observedCamera);
+
+                for (const label of this._frustumLabelPass.labels) {
+                    label.fontFace = fontFace;
+                }
+                this._frustumLabelFont = fontFace;
+
+                this.finishLoading();
+                this.invalidate(true);
+            })
+            .catch((reason) => auxiliaries.log(auxiliaries.LogLevel.Error, reason));
 
         return true;
     }
@@ -191,6 +248,8 @@ class DefaultSceneRenderer extends Renderer {
 
         this._context.gl.deleteBuffer(this._frustumBuffer);
         this._frustumProgram.uninitialize();
+
+        this._frustumLabelPass.uninitialize();
 
         this._defaultFBO.uninitialize();
     }
@@ -307,8 +366,7 @@ class DefaultSceneRenderer extends Renderer {
         gl.uniformMatrix4fv(this._frustumProgram.uniform('u_viewProjection'),
             gl.GL_FALSE, this._camera.viewProjection);
 
-
-        this._frustumData = this.createFrustumLines(this._observedCamera, this._renderFrustumToFar, this._frustumNearColor, this._frustumFarColor);
+        this.updateObservedFrustum(this._observedCamera);
 
         this._frustumBuffer = gl.createBuffer();
         gl.bindBuffer(gl.ARRAY_BUFFER, this._frustumBuffer);
@@ -330,10 +388,20 @@ class DefaultSceneRenderer extends Renderer {
         gl.disableVertexAttribArray(0);
         gl.disableVertexAttribArray(1);
 
+
+
         this._frustumProgram.unbind();
+
+
 
         gl.cullFace(gl.BACK);
         gl.disable(gl.CULL_FACE);
+
+
+        this._frustumLabelPass.update();
+        console.log(this._frustumLabelPass);
+        this._frustumLabelPass.frame();
+        this._frustumLabelPass.unbind();
 
     }
 
@@ -377,7 +445,7 @@ class DefaultSceneRenderer extends Renderer {
         return vec3.scaleAndAdd(out, out, side, sideFac);
     }
 
-    protected createFrustumLines(_camera: Camera, _includeFar: Boolean, _nearColor: vec3, _farColor: vec3): Float32Array {
+    protected updateObservedFrustum(_camera: Camera): void {
         const eye = _camera.eye;
         const near = _camera.near;
         const far = _camera.far;
@@ -415,7 +483,7 @@ class DefaultSceneRenderer extends Renderer {
         const ppf = this.buildCorner(vec3.create(), eye, fDir, fUp, +1, fSide, +1);
 
         // build lines
-        const numLines = (_includeFar) ? 19 : 11;
+        const numLines = (this._renderFrustumToFar) ? 19 : 11;
         const verticesPerLine = 2;
         const componentsPerVertex = 3;
 
@@ -426,48 +494,51 @@ class DefaultSceneRenderer extends Renderer {
 
         let offset = 0;
 
+        const nearColor = this._frustumNearColor;
+        const farColor = this._frustumFarColor;
+
         // near plane
         vertices.set(nnn, offset++ * 3);
-        vertices.set(_nearColor, offset++ * 3);
+        vertices.set(nearColor, offset++ * 3);
         vertices.set(npn, offset++ * 3);
-        vertices.set(_nearColor, offset++ * 3);
+        vertices.set(nearColor, offset++ * 3);
 
         vertices.set(npn, offset++ * 3);
-        vertices.set(_nearColor, offset++ * 3);
+        vertices.set(nearColor, offset++ * 3);
         vertices.set(ppn, offset++ * 3);
-        vertices.set(_nearColor, offset++ * 3);
+        vertices.set(nearColor, offset++ * 3);
 
         vertices.set(ppn, offset++ * 3);
-        vertices.set(_nearColor, offset++ * 3);
+        vertices.set(nearColor, offset++ * 3);
         vertices.set(pnn, offset++ * 3);
-        vertices.set(_nearColor, offset++ * 3);
+        vertices.set(nearColor, offset++ * 3);
 
         vertices.set(pnn, offset++ * 3);
-        vertices.set(_nearColor, offset++ * 3);
+        vertices.set(nearColor, offset++ * 3);
         vertices.set(nnn, offset++ * 3);
-        vertices.set(_nearColor, offset++ * 3);
+        vertices.set(nearColor, offset++ * 3);
 
         // cam to near plane
 
         vertices.set(_camera.eye, offset++ * 3);
-        vertices.set(_nearColor, offset++ * 3);
+        vertices.set(nearColor, offset++ * 3);
         vertices.set(nnn, offset++ * 3);
-        vertices.set(_nearColor, offset++ * 3);
+        vertices.set(nearColor, offset++ * 3);
 
         vertices.set(_camera.eye, offset++ * 3);
-        vertices.set(_nearColor, offset++ * 3);
+        vertices.set(nearColor, offset++ * 3);
         vertices.set(npn, offset++ * 3);
-        vertices.set(_nearColor, offset++ * 3);
+        vertices.set(nearColor, offset++ * 3);
 
         vertices.set(_camera.eye, offset++ * 3);
-        vertices.set(_nearColor, offset++ * 3);
+        vertices.set(nearColor, offset++ * 3);
         vertices.set(ppn, offset++ * 3);
-        vertices.set(_nearColor, offset++ * 3);
+        vertices.set(nearColor, offset++ * 3);
 
         vertices.set(_camera.eye, offset++ * 3);
-        vertices.set(_nearColor, offset++ * 3);
+        vertices.set(nearColor, offset++ * 3);
         vertices.set(pnn, offset++ * 3);
-        vertices.set(_nearColor, offset++ * 3);
+        vertices.set(nearColor, offset++ * 3);
 
         // blender-like up indicator
         const upTriangle1 = this.buildCorner(vec3.create(), eye, nDir, nUp, +1.1, nSide, +0.5);
@@ -475,66 +546,126 @@ class DefaultSceneRenderer extends Renderer {
         const upTriangleTop = this.buildCorner(vec3.create(), eye, nDir, nUp, +1.4, nSide, 0);
 
         vertices.set(upTriangle1, offset++ * 3);
-        vertices.set(_nearColor, offset++ * 3);
+        vertices.set(nearColor, offset++ * 3);
         vertices.set(upTriangle2, offset++ * 3);
-        vertices.set(_nearColor, offset++ * 3);
+        vertices.set(nearColor, offset++ * 3);
 
         vertices.set(upTriangle1, offset++ * 3);
-        vertices.set(_nearColor, offset++ * 3);
+        vertices.set(nearColor, offset++ * 3);
         vertices.set(upTriangleTop, offset++ * 3);
-        vertices.set(_nearColor, offset++ * 3);
+        vertices.set(nearColor, offset++ * 3);
 
         vertices.set(upTriangle2, offset++ * 3);
-        vertices.set(_nearColor, offset++ * 3);
+        vertices.set(nearColor, offset++ * 3);
         vertices.set(upTriangleTop, offset++ * 3);
-        vertices.set(_nearColor, offset++ * 3);
+        vertices.set(nearColor, offset++ * 3);
 
         // far plane
-        if (_includeFar) {
+        if (this._renderFrustumToFar) {
             // far plane itself
             vertices.set(nnf, offset++ * 3);
-            vertices.set(_farColor, offset++ * 3);
+            vertices.set(farColor, offset++ * 3);
             vertices.set(npf, offset++ * 3);
-            vertices.set(_farColor, offset++ * 3);
+            vertices.set(farColor, offset++ * 3);
 
             vertices.set(npf, offset++ * 3);
-            vertices.set(_farColor, offset++ * 3);
+            vertices.set(farColor, offset++ * 3);
             vertices.set(ppf, offset++ * 3);
-            vertices.set(_farColor, offset++ * 3);
+            vertices.set(farColor, offset++ * 3);
 
             vertices.set(ppf, offset++ * 3);
-            vertices.set(_farColor, offset++ * 3);
+            vertices.set(farColor, offset++ * 3);
             vertices.set(pnf, offset++ * 3);
-            vertices.set(_farColor, offset++ * 3);
+            vertices.set(farColor, offset++ * 3);
 
             vertices.set(pnf, offset++ * 3);
-            vertices.set(_farColor, offset++ * 3);
+            vertices.set(farColor, offset++ * 3);
             vertices.set(nnf, offset++ * 3);
-            vertices.set(_farColor, offset++ * 3);
+            vertices.set(farColor, offset++ * 3);
 
             // near -> far connections
             vertices.set(nnn, offset++ * 3);
-            vertices.set(_farColor, offset++ * 3);
+            vertices.set(farColor, offset++ * 3);
             vertices.set(nnf, offset++ * 3);
-            vertices.set(_farColor, offset++ * 3);
+            vertices.set(farColor, offset++ * 3);
 
             vertices.set(npn, offset++ * 3);
-            vertices.set(_farColor, offset++ * 3);
+            vertices.set(farColor, offset++ * 3);
             vertices.set(npf, offset++ * 3);
-            vertices.set(_farColor, offset++ * 3);
+            vertices.set(farColor, offset++ * 3);
 
             vertices.set(pnn, offset++ * 3);
-            vertices.set(_farColor, offset++ * 3);
+            vertices.set(farColor, offset++ * 3);
             vertices.set(pnf, offset++ * 3);
-            vertices.set(_farColor, offset++ * 3);
+            vertices.set(farColor, offset++ * 3);
 
             vertices.set(ppn, offset++ * 3);
-            vertices.set(_farColor, offset++ * 3);
+            vertices.set(farColor, offset++ * 3);
             vertices.set(ppf, offset++ * 3);
-            vertices.set(_farColor, offset++ * 3);
+            vertices.set(farColor, offset++ * 3);
         }
 
-        return vertices;
+        const nearPoint = this.buildCorner(vec3.create(), eye, nDir, nUp, 0, nSide, +1);
+        const farPoint = this.buildCorner(vec3.create(), eye, fDir, fUp, 0, fSide, +1);
+        const upTriangleBottom = this.buildCorner(vec3.create(), eye, nDir, nUp, +1.1, nSide, 0);
+        const upTriangleSize = vec3.distance(upTriangleBottom, upTriangleTop) * 0.5;
+
+        this.updateLabels(dir, up, eye, nearPoint, farPoint, nHalfHeight, upTriangleBottom, upTriangleSize);
+
+        this._frustumData = vertices;
+    }
+
+    protected updateLabels(lookAt: vec3, up: vec3, eye: vec3, nearPoint: vec3, farPoint: vec3, frustumFontHeight: Number, upTriangleBottom: vec3, upTriangleSize: Number): void {
+        var labels = new Array(4);
+        labels[0] = new Position3DLabel(new Text('Near-Clipping-Plane'), Label.Type.Static);
+        labels[0].lineAnchor = Label.LineAnchor.Center;
+        labels[0].alignment = Label.Alignment.Left;
+        labels[0].position = nearPoint;
+        labels[0].direction = lookAt;
+        labels[0].up = up;
+        labels[0].fontSize = frustumFontHeight;
+        labels[0].fontSizeUnit = Label.Unit.World;
+        labels[0].color.fromHex('#ffffff');
+
+        labels[0] = new Position3DLabel(new Text('Scatterplot'), Label.Type.Static);
+        labels[0].lineAnchor = Label.LineAnchor.Bottom;
+        labels[0].alignment = Label.Alignment.Center;
+        labels[0].position = [0.0, 0.0, 0.0];
+        labels[0].direction = [1.0, 1.0, -1.0];
+        labels[0].up = [-1.5, 0.5, -1.0];
+        labels[0].fontSize = 0.3;
+        labels[0].fontSizeUnit = Label.Unit.World;
+        labels[0].color.fromHex('#ffffff');
+
+        labels[1] = new Position3DLabel(new Text('Far-Clipping-Plane'), Label.Type.Static);
+        labels[1].lineAnchor = Label.LineAnchor.Center;
+        labels[1].alignment = Label.Alignment.Left;
+        labels[1].position = farPoint;
+        labels[1].direction = lookAt;
+        labels[1].up = up;
+        labels[1].fontSize = frustumFontHeight;
+        labels[1].fontSizeUnit = Label.Unit.World;
+        labels[1].color.fromHex('#ffffff');
+
+        labels[2] = new Position3DLabel(new Text('Up'), Label.Type.Static);
+        labels[2].lineAnchor = Label.LineAnchor.Bottom;
+        labels[2].alignment = Label.Alignment.Center;
+        labels[2].position = upTriangleBottom;
+        labels[2].direction = lookAt;
+        labels[2].up = up;
+        labels[2].fontSize = upTriangleSize;
+        labels[2].fontSizeUnit = Label.Unit.World;
+        labels[2].color.fromHex('#ffffff');
+
+        labels[3] = new Projected3DLabel(new Text('   Eye'), Label.Type.Dynamic);
+        labels[3].lineAnchor = Label.LineAnchor.Center;
+        labels[3].alignment = Label.Alignment.Left;
+        labels[3].position = eye;
+        labels[3].fontSize = 16.0;
+        labels[3].fontSizeUnit = Label.Unit.Mixed;
+        labels[3].color.fromHex('#ffffff');
+
+        this._frustumLabelPass.labels = labels;
     }
 
 }
