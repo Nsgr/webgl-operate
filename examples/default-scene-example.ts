@@ -65,7 +65,7 @@ class DefaultSceneRenderer extends Renderer {
     protected _uObservedTransform: WebGLUniformLocation;
 
     // settings
-    protected _enableClipping: Boolean;
+    protected _enableClipping = true;
     protected _observedTransform: mat4;
 
     // - OBSERVED CAMERA -
@@ -80,7 +80,7 @@ class DefaultSceneRenderer extends Renderer {
     protected _observedCenter = vec3.fromValues(0, 0, 0);
     protected _observedUp = vec3.fromValues(0, 1, 0);
     protected _observedNear = 1;
-    protected _observedFar = 8;
+    protected _observedFar = 5;
 
     // - ACTUAL CAMERA -
     // internal
@@ -136,10 +136,10 @@ class DefaultSceneRenderer extends Renderer {
         this._cuboid.initialize();
 
         // init cuboid shaders
-        const vert = new Shader(context, gl.VERTEX_SHADER, 'mesh-progressive.vert');
-        vert.initialize(require('./data/mesh-progressive.vert'));
-        const frag = new Shader(context, gl.FRAGMENT_SHADER, 'mesh.frag');
-        frag.initialize(require('./data/mesh.frag'));
+        const vert = new Shader(context, gl.VERTEX_SHADER, 'mesh-clipping.vert');
+        vert.initialize(require('./data/defaultsceneexample/mesh-clipping.vert'));
+        const frag = new Shader(context, gl.FRAGMENT_SHADER, 'mesh-clipping.frag');
+        frag.initialize(require('./data/defaultsceneexample/mesh-clipping.frag'));
 
         // init cuboid program
         this._program = new Program(context, 'CubeProgram');
@@ -152,11 +152,17 @@ class DefaultSceneRenderer extends Renderer {
 
         this._uViewProjection = this._program.uniform('u_viewProjection');
 
+        this._uObservedTransform = this._program.uniform('u_observedTransform');
+        this._uEnableClipping = this._program.uniform('u_enableClipping');
+
         // @scene
         const identity = mat4.identity(mat4.create());
         gl.uniformMatrix4fv(this._program.uniform('u_model'), false, identity);
         gl.uniform1i(this._program.uniform('u_texture'), 0);
         gl.uniform1i(this._program.uniform('u_textured'), false);
+
+
+
 
         this._texture = new Texture2D(context, 'Texture');
         this._texture.initialize(1, 1, gl.RGB, gl.RGB, gl.UNSIGNED_BYTE);
@@ -353,6 +359,10 @@ class DefaultSceneRenderer extends Renderer {
 
         this._program.bind();
         gl.uniformMatrix4fv(this._uViewProjection, false, this._camera.viewProjection);
+        gl.uniformMatrix4fv(
+            this._uObservedTransform, false, this._observedCamera.viewProjection);
+
+        gl.uniform1i(this._uEnableClipping, +this._enableClipping);
 
         this._cuboid.bind();
         this._cuboid.draw();
@@ -399,7 +409,6 @@ class DefaultSceneRenderer extends Renderer {
 
 
         this._frustumLabelPass.update();
-        console.log(this._frustumLabelPass);
         this._frustumLabelPass.frame();
         this._frustumLabelPass.unbind();
 
